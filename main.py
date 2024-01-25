@@ -1,4 +1,4 @@
-def parse(url:str)->dict:
+def parse(url: str) -> dict:
     result = {}
     parts = url.split("?")
 
@@ -14,8 +14,21 @@ def parse(url:str)->dict:
     return result
 
 
+def parse_cookie(url: str) -> dict:
+    result = {}
+    cookie_parts = url.split(";")
+
+    for part in cookie_parts:
+        pair = part.strip().split("=")
+
+        if len(pair) == 2:
+            result[pair[0]] = pair[1]
+
+    return result
+
+
 if __name__ == "main":
-    #parse() tests
+    # parse() tests
     assert parse("https://example.com/path/to/page?name=ferret&color=purple") == {
         "name": "ferret",
         "color": "purple",
@@ -28,10 +41,12 @@ if __name__ == "main":
         "name": "ferret",
         "color": "purple",
     }
-    assert parse("https://example.com/path/to/page?name=ferret&color=purple&surname=mytrik") == {
+    assert parse(
+        "https://example.com/path/to/page?name=ferret&color=purple&surname=mytrik"
+    ) == {
         "name": "ferret",
         "color": "purple",
-        "surname":"mytrik",
+        "surname": "mytrik",
     }
     assert parse("http://example.com/") == {}
     assert parse("http://example.com/fgfgfggdg") == {}
@@ -39,4 +54,18 @@ if __name__ == "main":
     assert parse("http://example.com/????") == {}
     assert parse("http://example.com/?name=Dima") == {"name": "Dima"}
     assert parse("http://example.com/?!!name=Dima") == {"!!name": "Dima"}
-
+    # parse_cookie() tests
+    assert parse_cookie("name=Dima;") == {"name": "Dima"}
+    assert parse_cookie("") == {}
+    assert parse_cookie("name=Dima;age=28;") == {"name": "Dima", "age": "28"}
+    assert parse_cookie("name=Dima=User;age=28;") == {"name": "Dima=User", "age": "28"}
+    assert parse_cookie(";") == {}
+    assert parse_cookie("name==!Dima;") == {}
+    assert parse_cookie("===") == {}
+    assert parse_cookie("name=Di;ma;age=28;") == {"name": "Di", "age": "28"}
+    assert parse_cookie("name=Dima;;;;") == {"name": "Dima"}
+    assert parse_cookie("name=Dima;age=28;surname=Chubencko") == {
+        "name": "Dima",
+        "age": "28",
+        "surname": "Chubencko",
+    }
